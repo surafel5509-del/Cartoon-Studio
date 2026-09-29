@@ -65,3 +65,20 @@ M0 Foundation -> M1 Project Core -> M2 Drawing -> M3 Animation -> M4 Scenes -> M
 10. Documentation as part of the product
 
 See docs/architecture/ARCHITECTURE.md and docs/roadmap/ROADMAP.md.
+
+
+## Production Asset Platform
+
+Cartoon Studio includes a dedicated large-scale asset architecture for characters, animation clips, props, environments, nature, ground, particles/VFX, textures/materials, audio, poses, expressions and templates. The initial content target includes 30+ reusable character packages with rich animation libraries, while the engine remains data-driven for future expansion.
+
+### Character Workflow
+
+Character Library -> Character Preview -> Animation Clip Browser -> Add to Scene -> Timeline -> Customize -> Save Variant
+
+Users can also create their own characters, rigs, animation clips and reusable assets and publish them into their personal/project library.
+
+See `docs/assets/ASSET_SYSTEM.md`, `docs/assets/CHARACTER_SYSTEM.md`, `docs/assets/ANIMATION_LIBRARY.md`, and `docs/product/CHARACTER_LIBRARY_UX.md`.
+
+## Feature Surface
+
+The long-term platform covers drawing, frame-by-frame animation, keyframes, timeline/dope sheet, rigging, reusable animation, scenes/shots, cameras, asset libraries, audio, lip-sync foundations, compositing, particles/VFX, textures, render queues, export, project recovery, content packs and optional AI-assisted tools.
