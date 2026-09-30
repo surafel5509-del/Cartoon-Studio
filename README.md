@@ -298,11 +298,46 @@ Before introducing a major subsystem:
 
 See CONTRIBUTING.md for repository contribution guidance.
 
+## Building & Running
+
+**Requirements:** JDK 17, Android SDK with `compileSdk 34` (`minSdk 26`), and an emulator or device running Android 8.0+. Gradle 8.7 is provided through the wrapper; no local Gradle install is needed.
+
+```bash
+# Debug APK -> app/build/outputs/apk/debug/app-debug.apk
+./gradlew :app:assembleDebug
+
+# Install onto a connected device or running emulator
+./gradlew :app:installDebug
+
+# Deterministic core/engine/data unit tests
+./gradlew testDebugUnitTest test
+```
+
+Open the repository root in Android Studio (Koala or newer) and run the `app` configuration for day-to-day development.
+
+Continuous integration lives in `.github/workflows/android.yml`: every push assembles the debug APK, runs the full test suite, uploads the APK as a build artifact, and mirrors any compiler output into a GitHub issue so failures are readable without downloading logs.
+
+### Module Layout
+
+The build is composed of 40 library modules plus `:app`, arranged strictly as **UI → Feature → Domain → Engine → Data/Platform**:
+
+| Group | Modules |
+| --- | --- |
+| `core` | `common`, `math`, `time`, `undo`, `serialization` |
+| `domain` | `model`, `drawing`, `animation`, `rigging`, `camera`, `audio`, `export` |
+| `engine` | `animation`, `rigging`, `drawing`, `scene`, `rendering`, `compositing`, `export` |
+| `data` | `project-store`, `asset-store`, `preferences`, `cache` |
+| `platform` | `graphics`, `media`, `android` |
+| `ui` | `design-system`, `components` |
+| `feature` | `drawing`, `timeline`, `animation`, `compositing`, `scenes`, `assets`, `audio`, `export`, `editor`, `onboarding`, `settings` |
+
+Module wiring is generated from `scripts/gen_modules.py`, which owns the dependency graph; edit that script rather than individual `build.gradle.kts` files and re-run `python3 scripts/gen_modules.py`.
+
 ## Project Status
 
-**Stage:** Architecture & Foundation → Production Implementation
+**Stage:** Production Implementation — the Android application builds, installs and runs.
 
-The repository contains the product architecture, engineering specifications, asset-system design, character-system design, and production roadmap. Implementation is being developed incrementally from core project/data models toward the full animation editor and production pipeline.
+The repository now contains a complete, compiling Kotlin/Compose application on top of the documented architecture: the timing/undo/math core, the domain model and project format, the deterministic animation/rigging/scene/render engine, the project and asset stores, the Android graphics and MediaCodec/MediaMuxer platform layers, and the full Jetpack Compose editor (drawing, timeline and dope sheet, onion skinning, layers and compositing, scenes and camera, character rigs, asset library, audio, and export). Specifications in `docs/` remain the source of truth and continue to lead implementation for the remaining roadmap milestones.
 
 ## License
 
