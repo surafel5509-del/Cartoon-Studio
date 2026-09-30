@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Film frame -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,32h48a4,4 0,0 1,4 4v36a4,4 0,0 1,-4 4h-48a4,4 0,0 1,-4 -4v-36a4,4 0,0 1,4 -4z" />
+    <path
+        android:fillColor="#14161A"
+        android:pathData="M32,38h44v32h-44z" />
+    <!-- Sprocket holes -->
+    <path
+        android:fillColor="#FF7043"
+        android:pathData="M26,30h6v5h-6zM26,40h6v5h-6zM26,50h6v5h-6zM26,60h6v5h-6zM26,70h6v5h-6zM76,30h6v5h-6zM76,40h6v5h-6zM76,50h6v5h-6zM76,60h6v5h-6zM76,70h6v5h-6z" />
+    <!-- Brush stroke -->
+    <path
+        android:fillColor="#4DD0E1"
+        android:pathData="M38,62c6,-14 12,-20 18,-18c6,2 4,12 -2,14c-6,2 -10,-4 -4,-10c4,-4 10,-4 14,0" />
+</vector>

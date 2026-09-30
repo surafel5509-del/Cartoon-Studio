@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      A bare splash theme: all real theming happens in Compose
+      (ui:design-system), so this only needs to avoid a white flash.
+    -->
+    <style name="Theme.CartoonStudio" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/studio_background</item>
+        <item name="android:statusBarColor">@color/studio_background</item>
+        <item name="android:navigationBarColor">@color/studio_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>
