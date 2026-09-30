@@ -39,13 +39,13 @@ jobs:
         id: assemble
         run: |
           set -o pipefail
-          ./gradlew :app:assembleDebug --stacktrace 2>&1 | tee -a build.log
+          ./gradlew :app:assembleDebug --stacktrace --continue 2>&1 | tee -a build.log
 
       - name: Run unit tests
         id: tests
         run: |
           set -o pipefail
-          ./gradlew testDebugUnitTest test --stacktrace 2>&1 | tee -a build.log
+          ./gradlew testDebugUnitTest test --stacktrace --continue 2>&1 | tee -a build.log
 
       - name: Report failure log
         if: failure()
@@ -58,7 +58,9 @@ jobs:
             echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
             echo
             echo '```'
-            grep -E "^(e:|w:|FAILURE|\* What went wrong|\* Where|Caused by|> )" build.log | head -300 || true
+            grep -E "^e: " build.log | sed "s|file:///home/runner/work/Cartoon-Studio/Cartoon-Studio/||" | sort -u | head -300 || true
+            echo
+            grep -E "^(FAILURE|\* What went wrong)" -A 6 build.log | head -60 || true
             echo '```'
             echo
             echo '<details><summary>Tail</summary>'

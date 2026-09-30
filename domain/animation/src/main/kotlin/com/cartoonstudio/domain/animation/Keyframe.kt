@@ -55,7 +55,7 @@ data class Keyframe(
 
     override fun compareTo(other: Keyframe): Int = frame.index.compareTo(other.frame.index)
 
-    internal fun easedFraction(t: Float): Float = when (interpolation) {
+    fun easedFraction(t: Float): Float = when (interpolation) {
         Interpolation.Hold -> 0f
         Interpolation.Linear -> t
         Interpolation.EaseIn -> Easings.EaseIn.transform(t)
