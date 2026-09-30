@@ -92,7 +92,8 @@ class ExportEngine(
             codec = codec,
         )
 
-        encoder.start(output).onFailure { return Outcome.failure(it) }
+        val started = encoder.start(output)
+        if (started is Outcome.Failure) return started
 
         var bitmap: android.graphics.Bitmap? = null
         try {
@@ -106,16 +107,18 @@ class ExportEngine(
                     heightPx = plan.heightPixels,
                     reuse = bitmap,
                 )
-                encoder.encodeFrame(bitmap!!).onFailure { error ->
+                val encoded = encoder.encodeFrame(bitmap!!)
+                if (encoded is Outcome.Failure) {
                     encoder.release()
-                    return Outcome.failure(error)
+                    return encoded
                 }
                 progress.report(
                     (index + 1).toFloat() / plan.frameCount,
                     "Rendering frame ${index + 1} of ${plan.frameCount}",
                 )
             }
-            encoder.finish().onFailure { return Outcome.failure(it) }
+            val finished = encoder.finish()
+            if (finished is Outcome.Failure) return finished
         } finally {
             bitmap?.recycle()
         }
@@ -143,7 +146,8 @@ class ExportEngine(
         val output = outputFile("$stem.gif")
         val delay = (100.0 / settings.frameRate.fps * settings.frameStep).toInt().coerceAtLeast(2)
         val encoder = GifEncoder(plan.widthPixels, plan.heightPixels, delay, settings.loopGif)
-        encoder.start(output).onFailure { return Outcome.failure(it) }
+        val started = encoder.start(output)
+        if (started is Outcome.Failure) return started
 
         var bitmap: android.graphics.Bitmap? = null
         try {
@@ -153,13 +157,15 @@ class ExportEngine(
                     planned.scene, project.settings, planned.sceneFrame,
                     plan.widthPixels, plan.heightPixels, reuse = bitmap,
                 )
-                encoder.addFrame(bitmap!!).onFailure { error ->
+                val added = encoder.addFrame(bitmap!!)
+                if (added is Outcome.Failure) {
                     encoder.release()
-                    return Outcome.failure(error)
+                    return added
                 }
                 progress.report((index + 1).toFloat() / plan.frameCount, "Encoding GIF frame ${index + 1}")
             }
-            encoder.finish().onFailure { return Outcome.failure(it) }
+            val finished = encoder.finish()
+            if (finished is Outcome.Failure) return finished
         } finally {
             bitmap?.recycle()
         }
@@ -191,7 +197,7 @@ class ExportEngine(
             val name = ExportPlanner.frameFileName(stem, index, plan.frameCount)
             val written = PngWriter.write(bitmap, File(directory, name))
             bitmap.recycle()
-            written.onFailure { return Outcome.failure(it) }
+            if (written is Outcome.Failure) return written
             totalBytes += written.getOrElse(0L)
             progress.report((index + 1).toFloat() / plan.frameCount, "Writing $name")
         }

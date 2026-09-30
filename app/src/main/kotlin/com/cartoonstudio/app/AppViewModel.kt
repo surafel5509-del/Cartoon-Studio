@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.cartoonstudio.core.common.Log
+import com.cartoonstudio.core.common.Outcome
 import com.cartoonstudio.data.preferences.EditorSettings
 import com.cartoonstudio.data.projectstore.ProjectSummary
 import com.cartoonstudio.domain.model.Project
@@ -40,12 +41,15 @@ class AppViewModel(private val container: AppContainer) : ViewModel() {
     fun open(projectId: String, recoverSnapshot: Boolean) {
         viewModelScope.launch {
             if (!recoverSnapshot) container.projectRepository.discardSnapshot(projectId)
-            container.projectRepository.load(projectId)
-                .onSuccess { project ->
-                    openProject.value = project
+            when (val loaded = container.projectRepository.load(projectId)) {
+                is Outcome.Success -> {
+                    openProject.value = loaded.value
                     container.preferences.setLastProject(projectId)
                 }
-                .onFailure { Log.e(TAG, "Could not open $projectId: ${it.message}") }
+
+                is Outcome.Failure ->
+                    Log.e(TAG, "Could not open $projectId: ${loaded.error.message}")
+            }
         }
     }
 
