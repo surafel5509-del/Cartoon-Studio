@@ -202,6 +202,23 @@ class RenderGraphBuilder(private val renderScale: Float = 1f) {
             } else {
                 baseColor.withAlphaFraction(baseColor.alphaFraction * opacityScale).argb
             }
+            // A closed stroke with a fill colour paints its interior first, so
+            // the outline always reads on top of its own fill.
+            val fill = stroke.fill
+            if (stroke.closed && fill != null && geometry.centerLine.size >= 3) {
+                val fillColor = tint ?: fill
+                commands += RenderCommand.FillPath(
+                    transform = matrix,
+                    outline = geometry.centerLine,
+                    argb = if (opacityScale >= 0.999f) {
+                        fillColor.argb
+                    } else {
+                        fillColor.withAlphaFraction(fillColor.alphaFraction * opacityScale).argb
+                    },
+                    erase = false,
+                )
+            }
+
             commands += RenderCommand.FillPath(
                 transform = matrix,
                 outline = geometry.outline,

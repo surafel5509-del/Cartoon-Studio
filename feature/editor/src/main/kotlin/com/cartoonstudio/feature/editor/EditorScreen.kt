@@ -258,7 +258,7 @@ private fun buildOverlays(state: EditorUiState): RenderOverlayOptions {
                     index >= current - onion.framesBefore &&
                     index <= current + onion.framesAfter
             }
-            .map { (index, cel) -> index - current to cel }
+            .map { (index, cel) -> index to cel }
             .sortedBy { it.first }
     } else {
         emptyList()
