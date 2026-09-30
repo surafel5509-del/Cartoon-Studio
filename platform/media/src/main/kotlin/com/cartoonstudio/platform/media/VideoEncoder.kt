@@ -45,9 +45,13 @@ class VideoEncoder(
     private var yuvBuffer: ByteArray? = null
     private var argbBuffer: IntArray? = null
 
-    fun start(output: File): Outcome<Unit> = try {
+    fun start(output: File): Outcome<Unit> {
         val codecName = selectEncoder(codec.mime)
             ?: return Outcome.failure(AppError.Unsupported("${codec.name} encoding"))
+        return startWith(output, codecName)
+    }
+
+    private fun startWith(output: File, codecName: String): Outcome<Unit> = try {
 
         val format = MediaFormat.createVideoFormat(codec.mime, width, height).apply {
             setInteger(MediaFormat.KEY_COLOR_FORMAT, colorFormat)

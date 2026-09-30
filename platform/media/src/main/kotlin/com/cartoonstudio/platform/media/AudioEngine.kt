@@ -92,14 +92,20 @@ class TimelineAudioPlayer(private val context: Context) {
         }
     }
 
-    fun importFromUri(uri: Uri, destination: File): Outcome<File> = try {
-        destination.parentFile?.mkdirs()
-        context.contentResolver.openInputStream(uri)?.use { input ->
-            destination.outputStream().use { output -> input.copyTo(output) }
-        } ?: return Outcome.failure(AppError.Io("Could not read the selected audio"))
-        Outcome.success(destination)
-    } catch (t: Throwable) {
-        Outcome.failure(AppError.Io("Could not import audio", t))
+    fun importFromUri(uri: Uri, destination: File): Outcome<File> {
+        return try {
+            destination.parentFile?.mkdirs()
+            val copied = context.contentResolver.openInputStream(uri)?.use { input ->
+                destination.outputStream().use { output -> input.copyTo(output) }
+            }
+            if (copied == null) {
+                Outcome.failure(AppError.Io("Could not read the selected audio"))
+            } else {
+                Outcome.success(destination)
+            }
+        } catch (t: Throwable) {
+            Outcome.failure(AppError.Io("Could not import audio", t))
+        }
     }
 
     private companion object {

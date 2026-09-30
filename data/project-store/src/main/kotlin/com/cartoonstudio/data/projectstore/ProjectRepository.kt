@@ -106,17 +106,22 @@ class ProjectRepository(
         paths.ensureDirectories()
         val stamped = project.copy(modifiedAtMillis = clock())
 
-        runCatchingOutcome("Encoding project") {
+        val outcome = runCatchingOutcome("Encoding project") {
             StudioJson.pretty.encodeToString(Project.serializer(), stamped)
         }.flatMap { json ->
             AtomicFiles.writeText(paths.document, json)
         }.flatMap {
             writeManifest(paths, manifestFor(stamped, dirty = false))
-        }.onSuccess {
+        }
+
+        // Refreshing is a suspending call, so it happens here rather than in an
+        // `onSuccess` callback.
+        if (outcome is Outcome.Success) {
             // A successful full save makes the autosave snapshot redundant.
             paths.recovery.delete()
             refresh()
         }
+        outcome
     }
 
     /**
@@ -146,24 +151,33 @@ class ProjectRepository(
     }
 
     suspend fun delete(projectId: String): Outcome<Unit> = withContext(dispatchers.io) {
-        AtomicFiles.deleteRecursively(pathsFor(projectId).root).onSuccess { refresh() }
+        val outcome = AtomicFiles.deleteRecursively(pathsFor(projectId).root)
+        if (outcome is Outcome.Success) refresh()
+        outcome
     }
 
     suspend fun duplicate(projectId: String): Outcome<Project> = withContext(dispatchers.io) {
-        load(projectId).flatMap { original ->
-            val copy = original.copy(
-                id = Ids.next("proj"),
-                name = "${original.name} copy",
-                createdAtMillis = clock(),
-                modifiedAtMillis = clock(),
-                revision = 0,
-            )
-            save(copy).map { copy }
+        when (val loaded = load(projectId)) {
+            is Outcome.Failure -> loaded
+            is Outcome.Success -> {
+                val original = loaded.value
+                val copy = original.copy(
+                    id = Ids.next("proj"),
+                    name = "${original.name} copy",
+                    createdAtMillis = clock(),
+                    modifiedAtMillis = clock(),
+                    revision = 0,
+                )
+                save(copy).map { copy }
+            }
         }
     }
 
     suspend fun rename(projectId: String, newName: String): Outcome<Unit> =
-        load(projectId).flatMap { save(it.copy(name = newName)) }
+        when (val loaded = load(projectId)) {
+            is Outcome.Failure -> loaded
+            is Outcome.Success -> save(loaded.value.copy(name = newName))
+        }
 
     /** Writes the cover image used in the project browser. */
     suspend fun writeThumbnail(projectId: String, bytes: ByteArray): Outcome<Unit> =
